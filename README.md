@@ -1,16 +1,16 @@
-# guideseq: The GUIDE-Seq Analysis Package
+# guideseq: GUIDE-Seq分析工具包
 [![travis badge](https://travis-ci.org/aryeelab/guideseq.svg?branch=master)](https://travis-ci.org/aryeelab/guideseq)
 
-The guideseq package implements our data preprocessing and analysis pipeline for GUIDE-Seq data. It takes raw sequencing reads (FASTQ) and a parameter manifest file (.yaml) as input and produces a table of annotated off-target sites as output.
+guideseq包实现了GUIDE-Seq数据的数据预处理和分析管道。 它将原始测序读取（FASTQ）和参数清单文件（.yaml）作为输入，并生成一个带注释的无偏离位点表作为输出。
 
-## Table of Contents
-- [Features](#features)
-- [Dependencies](#dependencies)
-- [Getting Set Up](#setup)
-	- [Installing Dependencies](#install_dependencies)
-	- [Download Reference Genome](#reference_genome)
-	- [Download and Set Up guideseq](#guideseq_setup)
-	- [Configuring a MiSeq to Output Index Reads](#miseq)
+## 目录
+- [功能](#features)
+- [依赖](#dependencies)
+- [配置](#setup)
+	- [安装依赖](#install_dependencies)
+	- [下载参考基因组](#reference_genome)
+	- [下载并设置guideseq](#guideseq_setup)
+	- [配置一个MiSeq以输出索引读数](#miseq)
 - [Running the Full Analysis Pipeline](#full_pipeline)
 	- [Quickstart](#quickstart)
 	- [Writing A Manifest File](#write_manifest)
@@ -33,67 +33,67 @@ The guideseq package implements our data preprocessing and analysis pipeline for
 	- [Can I analyze data without UMIs?](#no_umis)
 
 
-## Features<a name="features"></a>
+## 功能<a name="features"></a>
 
 
-The package implements a pipeline consisting of a read preprocessing module followed by an off-target identification module. The preprocessing module takes raw reads (FASTQ) from a pooled multi-sample sequencing run as input. Reads are demultiplexed into sample-specific FASTQs and PCR duplicates are removed using unique molecular index (UMI) barcode information.
+该软件包实现了一个由读取预处理模块和一个无偏离识别模块组成的流水线。 预处理模块使用混合多样本测序运行中的原始读取（FASTQ）作为输入。 读数（FASTQ）被分离成样本特异性FASTQ，并使用独特的分子指数（UMI）条形码信息去除PCR重复。
 
 ![guideseq_flowchart](guideseq_flowchart.png)
 
-The individual pipeline steps are:
+具体步骤如下:
 
-1. **Sample demultiplexing**: A pooled multi-sample sequencing run is demultiplexed into sample-specific read files based on sample-specific dual-indexed barcodes
-2. **PCR Duplicate Consolidation**:Reads that share the same UMI and the same first six bases of genomic sequence are presumed to originate from the same pre-PCR molecule and are thus consolidated into a single consensus read to improve quantitative interpretation of GUIDE-Seq read counts.
-3. **Read Alignment**: The demultiplexed, consolidated paired end reads are aligned to a reference genome using the BWA-MEM algorithm with default parameters (Li. H, 2009).
-4. **Candidate Site Identification**: The start mapping positions of the read amplified with the tag-specific primer (second of pair) are tabulated on a genome-wide basis. Start mapping positions are consolidated using a 10-bp sliding window. Windows with reads mapping to both + and - strands, or to the same strand but amplified with both forward and reverse tag-specific primers, are flagged as sites of potential DSBs. 25 bp of reference sequence is retrieved on either side of the most frequently occuring start-mapping position in each flagged window. The retrieved sequence is aligned to the intended target sequence using a Smith-Waterman local-alignment algorithm. 
-5. **False positive filtering**: Off-target cleavage sites with more than six mismatches to the intended target sequence, or that are present in background controls, are filtered out.
-6. **Reporting**: Identified off-targets, sorted by GUIDE-Seq read count are annotated in a final output table. The GUIDE-Seq read count is expected to scale approximately linearly with cleavage rates (Tsai et al., *Nat Biotechnol.* 2015).
-7. **Visualization**: Alignment of detected off-target sites is visualized via a color-coded sequence grid, as seen below:
+1. **样品分离**: 根据样品特定的双重索引条码序列将集中的多样品测序运行分离成样品特定的读取文件
+2. **PCR重复合并**:共享相同的UMI和相同的基因组序列的前六个碱基的读数被认为是来源于相同的pre-PCR分子，因此被整合为一个一致的读数，以改善GUIDE-Seq读取计数的定量解释。
+3. **读数对齐**：使用具有默认参数的BWA-MEM算法（Li.H，2009）将解复用的，合并的配对末端读数与参照基因组对齐。
+4. **候选位点识别**: 把用标签特异性引物扩增读数的起始映射位置在全基因组范围内列表。 起始映射位置使用10-bp滑动窗口进行合并。 具有映射到+和 - 链或同一条链但用正向和反向标签特异性引物扩增的读数窗口被标记为潜在DSB的位点。 在每个标记的窗口中最频繁出现的起始映射位置的任一侧检索25bp的参考序列。 使用Smith-Waterman局部对齐算法将检索的序列与预期的目标序列对齐。
+5. **错误阳性过滤**：过滤掉与目标靶序列超过6个错配或存在于背景对照中的脱靶切割位点。
+6. **报告**：通过GUIDE-Seq读取计数排序的已识别脱靶目标在最终输出表中注释。 预计GUIDE-Seq阅读计数将与解理率大致成线性关系 (Tsai et al., *Nat Biotechnol.* 2015).
+7. **可视化**：检测到的脱靶位点的对齐通过颜色编码的序列栅格可视化，如下所示：
 
 ![guideseq_flowchart](EMX1_visualization.png)
 
-## Dependencies<a name="dependencies"></a>
+## 依赖<a name="dependencies"></a>
 * Python (2.7)
-* Reference genome fasta file ([Example](http://www.broadinstitute.org/ftp/pub/seq/references/Homo_sapiens_assembly19.fasta))
-* [`bwa`](<http://bio-bwa.sourceforge.net/>) alignment tool
-* [`bedtools`](<http://bedtools.readthedocs.org/en/latest/>) genome arithmetic utility
+* 需要的基因fasta文件 ([示例](http://www.broadinstitute.org/ftp/pub/seq/references/Homo_sapiens_assembly19.fasta))
+* [`bwa`](<http://bio-bwa.sourceforge.net/>) 对齐工具
+* [`bedtools`](<http://bedtools.readthedocs.org/en/latest/>) 基因算法工具
 
 
-## Getting Set Up<a name="setup"></a>
+## 配置<a name="setup"></a>
 
-### Install Dependencies<a name="install_dependencies"></a>
+### 安装依赖<a name="install_dependencies"></a>
 
-To run guideseq, you must first install all necessary dependencies:
+要运行guideseq, 你必须安装所有需要的依赖包:
 
-- **Python 2.7**: If a version does not come bundled with your operating system, we recommend the [Anaconda](https://www.continuum.io/downloads) scientific Python package.
-- **Burrows-Wheeler Aligner (bwa)**: You can either install bwa with a package manager (e.g. `brew` on OSX or `apt-get` on Ubuntu/Debian), or you can download it from the [project page](http://bio-bwa.sourceforge.net/) and compile it from source.
-- **Bedtools**: You can either install bwa with a package manager (e.g. `brew` or `apt-get`), or you can download it from the [project page](http://bedtools.readthedocs.org/en/latest/content/installation.html) and compile it from source.
+- **Python 2.7**: 如果某个版本与您的操作系统不兼容，我们建议您使用 [Anaconda](https://www.continuum.io/downloads) 科学用Python包。
+- **Burrows-Wheeler Aligner (bwa)**: 您可以使用软件包管理器来安装bwa（例如，OSX上的`brew`或Ubuntu / Debian上的`apt-get`）, 或者从[bwa项目主页](http://bio-bwa.sourceforge.net/) 下载并自行编译源码。
+- **Bedtools**: 您可以使用软件包管理器来安装Bedtools（例如`brew`或`apt-get`）, 或者从[Bedtools项目主页](http://bedtools.readthedocs.org/en/latest/content/installation.html) 下载并自行编译源码。
 
-For both bwa and bedtools, make sure you know the path to the respective executables, as they need to be specified in the pipeline manifest file.
+对于bwa和bedtools，请确保知道各个可执行文件的路径，因为它们需要在管道清单文件中指定。
 
 
-### Download Reference Genome<a name="reference_genome"></a>
+### 下载参考基因组<a name="reference_genome"></a>
 
-The guideseq package requires a reference genome for read mapping. You can use any genome of your choosing, but for all of our testing and original GUIDE-seq analyses (Tsai et al. *Nature Biotechnol* 2015) we use hg19 ([download](http://www.broadinstitute.org/ftp/pub/seq/references/Homo_sapiens_assembly19.fasta)). Be sure to (g)unzip the FASTA file before use if it is compressed.
+guideseq软件包需要一个参考基因组来进行读数对照。 您可以使用您选择的任何基因组，但是对于我们所有的测试和原始GUIDE-seq分析（Tsai et al。*Nature Biotechnol* 2015），我们使用hg19基因组 ([下载](http://www.broadinstitute.org/ftp/pub/seq/references/Homo_sapiens_assembly19.fasta))。 如果您下载到的是一个压缩包，请确认先解压FASTA文件。
 
-### Download and Set Up guideseq<a name="guideseq_setup"></a>
+### 下载并设置guideseq<a name="guideseq_setup"></a>
 
-Once all dependencies are installed, there are a few easy steps to download and set up the guideseq package:
+所有依赖安装完成后，仅需几个简单的步骤就能够下载并设置guideseq软件包：
 
-1. Obtain a copy of the guideseq package source code. You can either download and unzip the latest source from the github [release page](https://github.com/aryeelab/guideseq/releases), or you use git to clone the repository by running `git clone --recursive https://github.com/aryeelab/guideseq.git`
-2. Install guideseq dependencies by entering the guideseq directory and running `pip install -r requirements.txt`
+1. 获取一份guideseq软件包的源代码。 你可以从github的 [release page](https://github.com/aryeelab/guideseq/releases)下载后解压, 或者通过运行 `git clone --recursive https://github.com/aryeelab/guideseq.git`来获取。
+2. 进入guideseq目录，运行 `pip install -r requirements.txt`来安装guideseq依赖。
 
-Once all guideseq dependencies are installed, you will be ready to start using guideseq.
+安装完所有的guideseq依赖后，你就可以准备开始使用guideseq了。
 
-### Configuring a MiSeq to Output Index Reads<a name="miseq"></a>
+### 配置一个MiSeq以输出索引读数<a name="miseq"></a>
 
-The guideseq package requires index reads from the MiSeq sequencing run for read consolidation. The default MiSeq Reporter settings do not generate index (I1, I2) reads. This feature can be enabled by adding the line 
+guideseq软件包需要读数索引以从MiSeq测序运行中进行读取合并。 默认的MiSeq Reporter设置不会生成索引读数（I1，I2）。 该功能可以通过添加一行代码
 
 ```xml
 <add key="CreateFastqForIndexReads" value="1"> 
 ```
 
-to the ``Miseq Reporter.exe.config`` file located in the Miseq Reporter installation folder. The default installation folder is  ``C:\Illumina\MiSeqReporter``. After modifying the config file it should look like this:
+到位于Miseq Reporter安装目录下的``Miseq Reporter.exe.config`` 文件来启用。 默认安装路径为 ``C:\Illumina\MiSeqReporter``。 编辑后的config文件应该是下面这样：
 
 
 ```xml
@@ -103,9 +103,9 @@ to the ``Miseq Reporter.exe.config`` file located in the Miseq Reporter installa
 </appSettings>
 ```
 
-The MiSeq Reporter service needs to be restarted for the change to take effect. Future runs of the GenerateFASTQ workflow (and probably other workflows) will generate I1 and I2 reads in addition to R1 and R2. All four of these reads files will be needed for guideseq analysis.
+MiSeq Reporter服务需要重启使变更生效。 后面的GenerateFASTQ运行流程 (也许包括其他的工作流程)除了``R1``和``R2``读数之外，还将会生成``I1``和``I2``读数。这四个读数文件都需要进行guideseq分析。
 
-See page 29 of the Miseq Reporter User Guide for further instructions.
+更多说明参见Miseq Reporter User Guide的第29页。
 
 
 ## Running the Full Analysis Pipeline<a name="full_pipeline"></a>
