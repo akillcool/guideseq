@@ -1,7 +1,7 @@
 # guideseq: GUIDE-Seq分析工具包
 [![travis badge](https://travis-ci.org/aryeelab/guideseq.svg?branch=master)](https://travis-ci.org/aryeelab/guideseq)
 
-guideseq包实现了GUIDE-Seq数据的数据预处理和分析管道。 它将原始测序读取（FASTQ）和参数清单文件（.yaml）作为输入，并生成一个带注释的无偏离位点表作为输出。
+guideseq包实现了GUIDE-Seq数据的数据预处理和分析流程。 它将原始测序读取（FASTQ）和参数清单文件（.yaml）作为输入，并生成一个带注释的无偏离位点表作为输出。
 
 ## 目录
 - [功能](#features)
@@ -11,11 +11,11 @@ guideseq包实现了GUIDE-Seq数据的数据预处理和分析管道。 它将�
 	- [下载参考基因组](#reference_genome)
 	- [下载并设置guideseq](#guideseq_setup)
 	- [配置一个MiSeq以输出索引读数](#miseq)
-- [Running the Full Analysis Pipeline](#full_pipeline)
-	- [Quickstart](#quickstart)
-	- [Writing A Manifest File](#write_manifest)
-	- [A Full Manifest File Example](manifest_example)
-	- [Pipeline Outputs](#pipeline_output)
+- [运行完整的分析流程](#full_pipeline)
+	- [快速开始](#quickstart)
+	- [写一个Manifest文件](#write_manifest)
+	- [一个完整的Manifest文件示例](manifest_example)
+	- [流程输出](#pipeline_output)
 - [Running Analysis Steps Individually](#)
 	- [Demultiplex](#demultiplex)
 	- [UMItag](#umitag)
@@ -36,7 +36,7 @@ guideseq包实现了GUIDE-Seq数据的数据预处理和分析管道。 它将�
 ## 功能<a name="features"></a>
 
 
-该软件包实现了一个由读取预处理模块和一个无偏离识别模块组成的流水线。 预处理模块使用混合多样本测序运行中的原始读取（FASTQ）作为输入。 读数（FASTQ）被分离成样本特异性FASTQ，并使用独特的分子指数（UMI）条形码信息去除PCR重复。
+该软件包实现了一个由读取预处理模块和一个无偏离识别模块组成的流程。 预处理模块使用混合多样本测序运行中的原始读取（FASTQ）作为输入。 读数（FASTQ）被分离成样本特异性FASTQ，并使用独特的分子指数（UMI）条形码信息去除PCR重复。
 
 ![guideseq_flowchart](guideseq_flowchart.png)
 
@@ -108,38 +108,39 @@ MiSeq Reporter服务需要重启使变更生效。 后面的GenerateFASTQ运行�
 更多说明参见Miseq Reporter User Guide的第29页。
 
 
-## Running the Full Analysis Pipeline<a name="full_pipeline"></a>
+## 运行完整的分析流程<a name="full_pipeline"></a>
 
-### Quickstart<a name="quickstart"></a>
+### 快速开始<a name="quickstart"></a>
 
-To run the full guideseq analysis pipeline, you must first create a manifest YAML file that describes all pipeline inputs. Once you have done so, you can simply run
+要运行完整的guideseq分析流程，你必须先创建一个包含声明所有流程输入的YAML清单文件。YAML清单文件创建完成之后，你可以通过
 
 ```
 python /path/to/guideseq.py all -m /path/to/manifest.yaml
 ```
-to run the entire pipeline. Below are specific instructions detailing how to write the manifest file.
+来运行整个流程。以下是如何编写清单文件的具体说明。
 
 If you wish to run an example on our abridged test data, you can simply run
+如果你想通过我们的简略测试数据来运行一个例子，你可以通过在guideseq根目录中运行
 
 ```
 python guideseq/guideseq.py all -m test/test_manifest.yaml
 ```
-from the guideseq root directory. The `test_manifest` assumes that both the `bwa` and `bedtools`executables are in your system PATH. You will see the pipeline results outputted to the `test/output` folder.
+来完成。 `test_manifest`假设`bwa`和`bedtools`都从系统PATH路径下运行。你可以在`test/output`文件夹下看到流程输出。
 
-### Writing A Manifest File<a name="write_manifest"></a>
-When running the end-to-end analysis functionality of the guideseq package, a number of inputs are required. To simplify the formatting of these inputs and to encourage reproducibility, these parameters are inputted into the pipeline via a manifest formatted as a YAML file. YAML files allow easy-to-read specification of key-value pairs. This allows us to easily specify our parameters. The following fields are required in the manifest:
+### 写一个Manifest文件<a name="write_manifest"></a>
+运行guideseq软件包的端到端分析功能时，需要多个输入参数。 为了简化这些输入参数的格式并鼓励再现性，这些参数通过格式化为YAML清单文件被输入到流程中。YAML文件可以轻松完成键值对的读取。这使我们可以轻松地指定我们的参数。 文件中需要以下字段：
 
-- `reference_genome`: The absolute path to the reference genome FASTA file.
-- `output_folder`: The absolute path to the folder in which all pipeline outputs will be saved.
-- `bwa`: The absolute path to the `bwa` executable
-- `bedtools`: The absolute path to the `bedtools` executable
-- `undemultiplexed`: The absolute paths to the undemultiplexed paired end sequencing files. The required parameters are:
-	- `forward`: The absolute path to the FASTQ file containing the forward reads.
-	- `reverse`: The absolute path to the FASTQ file containing the reverse reads.
-	- `index1`: The absolute path to the FASTQ file containing the forward index reads.
-	- `index2`: The absolute path to the FASTQ file containing the reverse index reads.
+- `reference_genome`: 参考基因组FASTA文件的绝对路径。
+- `output_folder`: 所有流程输出文件的保存文件夹，绝对路径。
+- `bwa`: `bwa` 可执行文件的绝对路径。
+- `bedtools`: `bedtools` 可执行文件的绝对路径。
+- `undemultiplexed`: 未解复用的配对末端测序文件的绝对路径。所需的参数是：
+	- `forward`: 包含正向读取的FASTQ文件的绝对路径。
+	- `reverse`: 包含反向读取的FASTQ文件的绝对路径。
+	- `index1`: 包含正向索引读取的FASTQ文件的绝对路径。
+	- `index2`: 包含反向索引读取的FASTQ文件的绝对路径。
 
-An example `undemultiplexed` field:
+`undemultiplexed` 字段的示例：
 
 ```
 undemultiplexed:
@@ -149,13 +150,13 @@ undemultiplexed:
     index2: ../test/data/undemux.i2.fastq.gz
 ```
 
-- `samples`: A nested field containing the details of each sample. At least two samples must be specified: a "control" sample (to be used to filter out background off-target sites) and at least one treatment sample. The required parameters are:
-	- `target`: The sample targetsites
-	- `barcode1`: The forward barcode
-	- `barcode2`: The reverse barcode
-	- `description`: A description of the sample
+- `samples`: 包含每个样本细节的嵌套字段。 必须至少指定两个样品：“对照（control）”样品（用于过滤背景脱靶位点）和至少一个处理样品。 所需的参数是：
+	- `target`: 样品靶位点
+	- `barcode1`: 正向条码
+	- `barcode2`: 反向条码
+	- `description`: 样品描述
 
-An example `samples` field:
+`samples` 字段的示例：
 
 ```
 samples:
@@ -172,9 +173,9 @@ samples:
         description: EMX1
 ```
 
-### A Full Manifest File Example<a name="manifest_example"></a>
+### 一个完整的Manifest文件示例<a name="manifest_example"></a>
 
-Below is an example of a full manifest file. Feel free to copy it and replace the parameters with your own experiment data. Remember that you can input more than just one treatment sample (e.g. the "EMX1" data below).
+下面是一个完整的YAML清单文件的例子。 随意复制它，并用您自己的实验数据替换参数。 请记住，您可以输入不止一个处理样本（例如下面的“EMX1”数据）。
 
 ```
 reference_genome: test/test_genome.fa
@@ -206,64 +207,64 @@ samples:
 
 ```
 
-### Pipeline Output<a name="pipeline_output"></a>
+### 流程输出<a name="pipeline_output"></a>
 
-When running the full pipeline, the results of each step are outputted to the `output_folder` in a separate folder for each step. The output folders and their respective contents are as follows:
-
-
-#### Output Folders
-- `output_folder/demultiplexed`: Contains the four undemultiplexed reads files (forward, reverse, index1, index2) for each sample.
-- `output_folder/umitagged`: Contains the two umitgged reads files (forward, reverse) for each sample.
-- `output_folder/consolidated`: Contains the two consolidated reads files (forward, reverse) for each sample.
-- `output_folder/aligned`: Contains an alignment `.sam` file for each sample.
-- `output_folder/identified`: Contains a tab-delimited `.txt` file for each sample with an identified off-target in each row.
-- `output_folder/filtered`: Contains a tab-delimited `.txt` file for each sample containing the identified DSBs that are background sites (not off-targets)
-- `output_folder/visualization`: Contains a `.svg` vector image representing an alignment of all detected off-targets to the targetsite for each sample.
+运行整个流程时，每一步的结果会在输出目录（即`output_folder`字段中设定的文件夹）中生成一个独立的文件夹。输出的文件夹及其各自的内容如下：
 
 
-The final detected off-target sites are placed in the `output_folder/identified` folder, with one `.txt` file for each sample specified in the manifest. The fields that are populated in each row of these off-target files are specified below:
+#### 输出文件夹
+- `output_folder/demultiplexed`: 包含每个样本的四个未解复用的读取文件（正向，反向，index1，index2）。
+- `output_folder/umitagged`: 包含每个样本的两个umitgged读取文件（正向，反向）。
+- `output_folder/consolidated`: 包含每个样本的两个合并读取文件（正向，反向）。
+- `output_folder/aligned`: 包含每个样本的一个对齐`.sam`文件。
+- `output_folder/identified`: 包含每个样本的制表符分隔的`.txt`文件，每行有一个off-target标识。
+- `output_folder/filtered`: 包含每个样品的一个制表符分隔的`.txt`文件，其中有已标识的DSB的每个样本，这些DSB是背景位点（而非脱靶位点）
+- `output_folder/visualization`: 包含一个`.svg`矢量图像，表示每个样本的所有检测到的脱靶目标与目标点的对齐。
 
-####Output Off-Targets `.txt` Fields:
 
-- `BED Chromosome`: Window chromosome
-- `BED Min.Position`: Window 0-based start position
-- `BED Max.Position`: Window 0-based end position
-- `BED Name`: Name of window 
-- `Filename`: The name of the current `.SAM` file used in analysis.
-- `WindowIndex`: Index number of window
-- `Chromosome`: Chromosome corresponding to position with maximum reads in window (matches `BED Chromosome`)
-- `Position`: Position with maximum number of reads in window
-- `Sequence`: The window sequence, starting 25 bp upstream and ending 25 bp downstream of `Chromosome:Position`
-- `+.mi`: Number of forward reads with distinct molecular indices
-- `-.mi`: Number of reverse reads with distinct molecular indices
-- `bi.sum.mi`: Sum of the `+.mi` and `-.mi` fields (GUIDE-seq Read Count)
-- `bi.geometric_mean.mi`: Geometric mean of the `+.mi` and `-.mi` fields
-- `+.total`: Total number of forward mapping reads 
-- `-.total`: Total number of reverse mapping reads 
-- `total.sum`: Sum of `+.total` and `-.total` fields
-- `total.geometric_mean`: Geometric mean of the `+.total` and `-.total` fields
-- `primer1.mi`: Number of reads amplified by forward primer with distinct molecular indices
-- `primer2.mi`: Number of reads amplified by reverse primer with distinct molecular indices
-- `primer.geometric_mean`: Geometric mean of the `primer1.mi` and `primer2.mi` fields
-- `position.stdev`: Standard deviation of positions within genomic window
-- `Off-Target Sequence`: Off-target sequence derived from genome reference
-- `Mismatches`: Number of mismatches between the intended target sequence and the off-target sequence
-- `Length`: Length of the target sequence
-- `BED off-target Chromosome`: Off-target chromosome
-- `BED off-target start`: Off-target 0-based start position
-- `BED off-target end`: Off-target 0-based end position
-- `BED off-target name`: Off-target name
-- `BED Score`: Field to conform to standard BED format
-- `Strand`: Indicates the strand of detected off-target site. `+` for forward strand and `-` for reverse strand
-- `Cells`: Cell type
-- `Target site`: Targetsite name
-- `Target Sequence`: Intended target site sequence (including PAM)
+最终检测到的脱靶位点被放置在`output_folder/identified`文件夹中，每个YAML清单中指定的每个样本都有一个`.txt`文件。 这些脱靶样本文件的每一行中填充的字段如下所示：
 
-The key fields for interpreting this output and identifying off-target sites are: `BED off-target Chromosome`, `BED off-target start`, `BED off-target end`, `BED off-target name`, `BED off-target strand`, `Off-Target Sequence`, `bi.sum.mi`
+#### 输出脱靶 `.txt` 字段：
 
-#### Output Visualizations
+- `BED Chromosome`: 窗口染色体
+- `BED Min.Position`: 基于窗口0的开始位点
+- `BED Max.Position`: 基于窗口0的结束位点
+- `BED Name`: 窗口的名称
+- `Filename`: 分析中使用的当前`.SAM`文件的名称。
+- `WindowIndex`: 窗口的索引号
+- `Chromosome`: 与在窗口中具有最大读数的位置相对应的染色体(与 `BED Chromosome`相匹配)
+- `Position`: 窗口中读取次数最多的位点
+- `Sequence`: 窗口序列，位于`Chromosome:Position`上下游25bp之间
+- `+.mi`: 具有不同分子指数的正向读数
+- `-.mi`: 具有不同分子指数的反向读数
+- `bi.sum.mi`: `+.mi`和`-.mi`字段的总和 (GUIDE-seq读数)
+- `bi.geometric_mean.mi`: `+.mi`和`-.mi`字段的几何平均值
+- `+.total`: 正向映射读取的总数
+- `-.total`: 反向映射读取的总数
+- `total.sum`: `+.total`和`-.total`字段的总和。
+- `total.geometric_mean`: `+.total`和`-.total`字段的几何平均值
+- `primer1.mi`: 具有不同分子指数的正向引物扩增的读数数目
+- `primer2.mi`: 具有不同分子指数的反向引物扩增的读数数目
+- `primer.geometric_mean`: `primer1.mi`和`primer2.mi`字段的几何平均值
+- `position.stdev`: 基因组窗口内位置的标准偏差
+- `Off-Target Sequence`: 从参考基因组衍生的脱靶序列
+- `Mismatches`: 预期目标序列与脱靶序列之间的错配数目
+- `Length`: 目标序列的长度
+- `BED off-target Chromosome`: 脱靶染色体
+- `BED off-target start`: 脱靶0基准起始位置
+- `BED off-target end`: 脱靶0基准结束位置
+- `BED off-target name`: 脱靶名称
+- `BED Score`: 符合标准BED格式的字段
+- `Strand`: 表示检测到的脱离目标站点的链。 `+` 表示正向链， `-` 表示反向链
+- `Cells`: 细胞类型
+- `Target site`: 目标位点名称
+- `Target Sequence`: 预期的目标位点序列（包括PAM）
 
-The outputted visualizations are in the `.svg` vector format, which is an open image standard that can be viewed in any modern web browser (e.g. Google Chrome, Apple Safari, Mozilla Firefox), and can be viewed and edited in any vector editing application (e.g. Adobe Illustrator). Because the output visualizations are vector images, they can be scaled up or down infinitely without a loss in quality, and can also be edited as shapes with ease. This makes the images produced by the guideseq package ideal for posters, presentations, and papers.
+解释这个输出和识别脱靶点的关键字段是： `BED off-target Chromosome`, `BED off-target start`, `BED off-target end`, `BED off-target name`, `BED off-target strand`, `Off-Target Sequence`, `bi.sum.mi`
+
+#### 输出可视化
+
+输出的可视化格式为`.svg`矢量格式，它是一个开放的图像标准，可以在任何现代的网页浏览器（例如Google Chrome，Apple Safari，Mozilla Firefox）中查看，并且可以在任何矢量图像编辑应用程序中查看和编辑（例如Adobe Illustrator）。 因为输出的可视化是矢量图像，所以它们可以无限放大或缩小，而不会损失质量，还可以轻松地编辑为形状。 这使得guideseq包所制作的图像非常适合海报，演示文稿和论文。
 
 ## Running Analysis Steps Individually<a name="individual_steps"></a>
 
