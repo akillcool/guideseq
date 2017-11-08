@@ -16,21 +16,21 @@ guideseq包实现了GUIDE-Seq数据的数据预处理和分析流程。 它将�
 	- [写一个Manifest文件](#write_manifest)
 	- [一个完整的Manifest文件示例](manifest_example)
 	- [流程输出](#pipeline_output)
-- [Running Analysis Steps Individually](#)
-	- [Demultiplex](#demultiplex)
-	- [UMItag](#umitag)
-	- [Consolidate](#consolidate)
-	- [Align](#align)
-	- [Identify](#identify)
-	- [Filter](#filter)
-	- [Visualize](#visualize)
-- [Testing the guideseq Package](#testing)
-	- [Single-Step Regression Tests](#regression_tests)
-	- [Full Large Test](#full_test)
-	- [Manual Testing](#manual_test)
-- [Frequently Asked Questions](#FAQ)
-	- [How do I Run the Pipeline with Demultiplexed Data?](#demultiplexed_run)
-	- [Can I analyze data without UMIs?](#no_umis)
+- [运行独立的分析步骤](#)
+	- [解复用](#demultiplex)
+	- [UMItag读数](#umitag)
+	- [合并](#consolidate)
+	- [对齐](#align)
+	- [识别](#identify)
+	- [筛除](#filter)
+	- [可视化](#visualize)
+- [测试guideseq软件包](#testing)
+	- [单步回归测试](#regression_tests)
+	- [全面测试](#full_test)
+	- [手动测试](#manual_test)
+- [常见问题](#FAQ)
+	- [如何使用解复用数据来运行流程？](#demultiplexed_run)
+	- [能否不通过UMIs来分析数据？](#no_umis)
 
 
 ## 功能<a name="features"></a>
@@ -214,7 +214,7 @@ samples:
 
 #### 输出文件夹
 - `output_folder/demultiplexed`: 包含每个样本的四个未解复用的读取文件（正向，反向，index1，index2）。
-- `output_folder/umitagged`: 包含每个样本的两个umitgged读取文件（正向，反向）。
+- `output_folder/umitagged`: 包含每个样本的两个umitagged读取文件（正向，反向）。
 - `output_folder/consolidated`: 包含每个样本的两个合并读取文件（正向，反向）。
 - `output_folder/aligned`: 包含每个样本的一个对齐`.sam`文件。
 - `output_folder/identified`: 包含每个样本的制表符分隔的`.txt`文件，每行有一个off-target标识。
@@ -266,28 +266,28 @@ samples:
 
 输出的可视化格式为`.svg`矢量格式，它是一个开放的图像标准，可以在任何现代的网页浏览器（例如Google Chrome，Apple Safari，Mozilla Firefox）中查看，并且可以在任何矢量图像编辑应用程序中查看和编辑（例如Adobe Illustrator）。 因为输出的可视化是矢量图像，所以它们可以无限放大或缩小，而不会损失质量，还可以轻松地编辑为形状。 这使得guideseq包所制作的图像非常适合海报，演示文稿和论文。
 
-## Running Analysis Steps Individually<a name="individual_steps"></a>
+## 运行独立的分析步骤<a name="individual_steps"></a>
 
-In addition to end-to-end pipeline analysis functionality, the guideseq package also allows for every step fo the analysis to be run individually. Here we have detailed the required inputs and expected outputs of each step. For each step, we have included a "runnable example" command that can be executed from the guideseq root directory to run that step on the included sample data. These "runnable example" snippets put their output in the `test/output` folder.
+除了端到端的流程分析功能之外，guideseq软件包还允许分析的每一步都能单独运行。 在这里我们详细介绍了每一步所需的输入和预期的输出。 对于每一个步骤，我们都包含一个可以从guideseq根目录执行的命令实例，以对包含的样本数据运行该步骤。 这些命令的输出在`test/output`文件夹中。
 
-### `demultiplex` Pooled Multi-Sample Sequencing (Manifest Required)<a name="demultiplex"></a>
+### `解复用` 多样本合并测序(需要YAML清单文件)<a name="demultiplex"></a>
 
-- **Functionality**: Given undemultiplexed sequence files and sample barcodes specified in the manifest, output the demultiplexed sample-specific reads in FASTQ format. The forward, reverse, and two index files for each sample in the manifest	 are outputted to the `output_folder/consolidated` folder.
-- **Required Parameters**:
-	- `-m or --manifest`: Specify the path to the manifest YAML file
-- **Runnable Example**:
+- **功能**: 对给定的在YAML清单中未复用的序列文件和条码样本，以FASTQ格式输出解复用的样本特定读数。 YAML清单中每个样本的正向，反向和两个索引文件被输出到`output_folder/consolidated`文件夹。
+- **所需参数**:
+	- `-m 或 --manifest`: 指定YAML清单文件的路径
+- **运行示例**:
 	- `python guideseq/guideseq.py demultiplex -m test/test_manifest.yaml`
 
-### `umitag` Reads<a name="umitag"></a>
+### `umitag` 读数<a name="umitag"></a>
 
-- **Functionality**: Given the demultiplexed files in the folder `output_folder/undemultiplexed` (where `output_folder` is specified in the manifest), 'tag' the reads by adding the UMI barcode sequence to the FASTQ read name header in preparation for the subsequent PCR duplicate read consolidation step. The forward and reverse files for each sample in the manifest are outputted to the `output_folder/umitagged` folder.
-- **Required Parameters**:
-	- `--read1`: Path to the forward demultiplexed reads file (FASTQ)
-	- `--read2`: Path to the reverse demultiplexed reads file (FASTQ)
-	- `--index1`: Path to the index1 demultiplexed reads file (FASTQ)
-	- `--index2`: Path to the index2 demultiplexed reads file (FASTQ)
-	- `--outfolder`: Path to the folder in which the output files will be saved
-- **Runnable Example**:
+- **功能**: 对给定文件夹`output_folder/undemultiplexed`中的解复用文件（其输出路径（`output_folder`）在清单中指定），通过将UMI条形码序列添加到FASTQ读数名称头中来“标签化”读数，为随后的PCR重复读取整合步骤进行准备。 清单中每个样本的正向和反向文件被输出到 `output_folder/umitagged`文件夹。
+- **所需参数**:
+	- `--read1`: 正向解复用读数文件（FASTQ）的路径
+	- `--read2`: 反向解复用读数文件（FASTQ）的路径
+	- `--index1`: index1解复用读数文件（FASTQ）的路径
+	- `--index2`: index2解复用读数文件（FASTQ）的路径
+	- `--outfolder`: 输出文件文件夹的路径
+- **运行示例**:
 
 	```
 	python guideseq/guideseq.py umitag --read1 test/data/demultiplexed/EMX1.r1.fastq \
@@ -297,17 +297,17 @@ In addition to end-to-end pipeline analysis functionality, the guideseq package 
 	--outfolder test/output/
 	```
 
-### `consolidate` PCR Duplicates<a name="consolidate"></a>
+### `合并` PCR复制<a name="consolidate"></a>
 
-- **Functionality**: Given undemultiplexed sequence files and sample barcodes specified in the manifest, output the consolidated forward and reversed reads to the `outfolder`.
-- **Required Parameters**:
-	- `--read1`: Path to the forward umitagged reads file (FASTQ)
-	- `--read2`: Path to the reverse umitagged reads file (FASTQ)
-	- `--outfolder`: Path to the folder in which the output files will be saved
-- **Optional Parameters**:
-	- `--min_quality`: The minimum quality of a read for it to be considered in the consolidation
-	- `--min_frequency`: The minimum frequency of a read for the position to be consolidated
-- **Runnable Example**:
+- **功能**: 给出在清单中指定的未复用的序列文件和示例条形码，将合并的正向和反向读取输出到 `outfolder`。
+- **所需参数**:
+	- `--read1`: 正向umitagged读数文件（FASTQ）的路径
+	- `--read2`: 反向umitagged读数文件（FASTQ）的路径
+	- `--outfolder`: 输出文件文件夹的路径
+- **可选参数**:
+	- `--min_quality`: 合并中要考虑的最小读数质量
+	- `--min_frequency`: 合并位点的最小读数频率
+- **运行示例**:
 
 	```
 	python guideseq/guideseq.py consolidate --read1 test/data/umitagged/EMX1.r1.umitagged.fastq \
@@ -315,16 +315,16 @@ In addition to end-to-end pipeline analysis functionality, the guideseq package 
 	 --outfolder test/output/
 	```
 
-### `align` Sites to Genome<a name="align"></a>
+### `对齐` 位点到基因<a name="align"></a>
 
-- **Functionality**: Given the consolidated forward and reverse reads, execute a paired-end mapping of the sequences to the reference genome using the `bwa` package. Outputs an alignment `.sam` file to the `outfolder`.
-- **Required Parameters**:
-	- `--bwa`: Path to the `bwa` executable
-	- `--genome`: Path to the reference genome FASTA file
-	- `--read1`: Path to the consolidated forward read FASTQ file
-	- `--read2`: Path to the consolidated reverse read FASTQ file
-	- `--outfolder`: Path to the folder in which the output files will be saved
-- **Runnable Example**:
+- **功能**: 给出合并后的正向和反向读数，使用`bwa`包执行序列与参考基因组的双末端对齐。将 `.sam` 对齐文件输出到 `outfolder`.
+- **所需参数**:
+	- `--bwa`: `bwa`的执行路径
+	- `--genome`: 参考基因组FASTA文件的路径
+	- `--read1`: 合并后的正向读数文件（FASTQ）的路径
+	- `--read2`: 合并后的反向读数文件（FASTQ）的路径
+	- `--outfolder`: 输出文件文件夹的路径
+- **运行示例**:
 
 	```
 	python guideseq/guideseq.py align --bwa bwa --genome test/test_genome.fa\
@@ -333,17 +333,17 @@ In addition to end-to-end pipeline analysis functionality, the guideseq package 
 	 --outfolder test/output/
 	```
 
-### `identify` Off-target Site Candidates<a name="identify"></a>
+### `识别` 脱靶候选位点<a name="identify"></a>
 
-- **Functionality**: Given the alignment samfile for a given site, a reference genome, and a target sequence, output a tab-delimited `.txt` file containing the identified off-target sites.
-- **Required Parameters**:
-	- `--aligned`: Path to the site-specific alignment `.sam` file.
-	- `--genome`: Path to the reference genome FASTA file.
-	- `--outfolder`: Path to the folder in which the output files will be saved.
-	- `--target_sequence`: The sequence targeted in the sample (blank for control sample)
-- **Optional Parameters**:
-	- `--description`: Specify additional information about the sample.
-- **Runnable Example**:
+- **功能**: 对指定的位点、参考基因组和目标序列给出其对齐sam文件，输出一个制表符分隔的、包含已识别的脱靶位点的`.txt`文件
+- **所需参数**:
+	- `--aligned`: 特定位点的对齐`.sam`文件的路径。
+	- `--genome`: 参考基因组FASTA文件的路径
+	- `--outfolder`: 输出文件文件夹的路径
+	- `--target_sequence`: 样本中的指定序列 (对照样本（control）为空白)
+- **可选参数**:
+	- `--description`: 指定关于样本的附加信息。
+- **运行示例**:
 
 	```
 	python guideseq/guideseq.py identify --aligned test/data/aligned/EMX1.sam\
@@ -351,15 +351,15 @@ In addition to end-to-end pipeline analysis functionality, the guideseq package 
 	 --target_sequence GAGTCCGAGCAGAAGAAGAANGG --description EMX1
 	```
 
-### `filter` Background DSB Sites<a name="filter"></a>
+### `筛除` 背景DSB位点<a name="filter"></a>
 
-- **Functionality**: Given the identified site `.txt` files for a treatment and control samples, output a `.txt` file in the same format as outputted by the `identify` step containing the sites filtered out as false-positives.
-- **Required Parameters**:
-	- `--bedtools`: Path to the `bedtools` executable
-	- `--identified`: Path to the `.txt` file outputted by the `identify` step for a treatment sample.
-	- `--background`: Path to the `.txt` file outputted by the `identify` step for a control sample.
-	- `--outfolder`: Path to the folder in which the output files will be saved.
-- **Runnable Example**:
+- **功能**: 给定处理和控制样本的识别位点`.txt`文件，输出一个`.txt`文件，其格式与`识别`步骤输出的格式相同，其中包含筛选出的误报位点。
+- **所需参数**:
+	- `--bedtools`:  `bedtools`可执行文件的路径
+	- `--identified`: 处理样本在`识别`步骤输出的`.txt`文件的路径。
+	- `--background`: 对照样本（control）在`识别`步骤输出的`.txt`文件的路径。
+	- `--outfolder`: 输出文件文件夹的路径
+- **运行示例**:
 
 	```
 	python guideseq/guideseq.py filter --bedtools bedtools\
@@ -368,76 +368,74 @@ In addition to end-to-end pipeline analysis functionality, the guideseq package 
 	 --outfolder test/output/
 	```
 
-### `visualize` Detected Off-Target Sites<a name="visualize"></a>
+### `可视化` 检测到的脱靶位点<a name="visualize"></a>
 
-- **Functionality**: Given an identified off-target sites `.txt` file, output an alignment visualization of the off-target sites.
-- **Required Parameters**:
-	- `--infile`:  Path to the input `.txt.` off-targets file
-	- `--outfolder`: Path to the outputted folder containing the outputted `.svg` graphic
-- **Optional Parameters**:
-	- `--title`: Specify the title of the visualization, to be printed at the top of the graphic. Useful for posters and presentations.
-- **Runnable Example**:
+- **功能**: 给出一个已识别的脱靶位点`.txt`文件，输出对齐的脱靶位点可视化图。
+- **所需参数**:
+	- `--infile`:  输入的脱靶位点 `.txt` 文件路径
+	- `--outfolder`: 包含输出的`.svg`图形的输出文件夹的路径
+- **可选参数**:
+	- `--title`: 指定可视化图形的标题，标题显示在图形顶部。用于海报和演示文稿。
+- **运行示例**:
 
 	```
 	python guideseq/guideseq.py visualize --infile test/data/identified/EMX1_identifiedOfftargets.txt\
 	 --outfolder test/output/ --title EMX1
 	```
 
-## Testing the guideseq Package<a name="testing"></a>
+## 测试guideseq软件包<a name="testing"></a>
 
-In the spirit of Test-Driven Development, we have written end-to-end tests for each step of the pipeline. These can be used to ensure that the software is running with expected functionality.
+本着测试驱动开发的精神，我们为流程的每一步都编写了端到端的测试。 这些测试可以用来确保软件的功能按照期望运行。
 
-NOTE: Due to differences in sorting between different versions of the `bwa` package, you must be using `bwa v0.7.9a` for these tests to work. We also recommend that you use `bedtools v2.25.0` when running these tests for consistency's sake.
+注意：由于不同版本的`bwa`软件包之间存在差异，您必须使用`bwa v0.7.9a`来进行这些测试。 我们还建议您在运行这些测试时使用`bedtools v2.25.0`来保证一致性。
 
-### Single-Step Regression Tests<a name="regression_tests"></a>
+### 单步回归测试<a name="regression_tests"></a>
 
-For ongoing testing and development, we have created an abridged set of input data and expected output data for each step of the pipeline. This way, changes to the pipeline can be quickly tested for feature regression.
+对于正在进行的测试和开发，我们为流程的每个步骤创建了一组简略的输入数据和预期的输出数据。 这样就可以快速测试流程的更改以进行特征回归。
 
-To run these tests, you must first install the `nose` testing Python package.
+要运行这些测试，你必须首先安装`nose`测试Python包。
 
 ```
 pip install nose
 ```
 
-Then, from the guideseq root directory, simply run
-
+然后，只需在guideseq根目录运行
 ```
 nosetests
 ```
+每个流程步骤的回归测试将会开始运行。
 
-and the regression tests for each pipeline step will be run.
+### 全面测试<a name="full_test"></a>
 
-### Full Large Test<a name="full_test"></a>
+如果您有更多的时间，我们准备了一个bash脚本，用于从源代码下载和编译所有依赖项，下载新的参考基因组以及完整的GUIDE-seq测序运行数据，并对整个流程进行全面测试。 这个测试需要很长时间，但是我们需要在我们添加新版本之前运行它。
 
-If you have more time, we have prepared a bash script that downloads and compiles all dependencies from source, downloads a fresh reference genome and a full GUIDE-seq sequencing data run, and performs a full test of the entire pipeline. This test takes a long time, but we require that it be run before we tag a new release.
-
-To run the full large test, enter the `guideseq/test` folder and run
+要运行全面测试，进入`guideseq/test`目录并运行
 
 ```
 ./large_test.sh
 ```
 
-Then, sit back and watch the full large testing process unfold automatically in the terminal.
+然后，坐看全面测试自动在终端中运行。
 
-### Manual Testing<a name="manual_test"></a>
+### 手动测试<a name="manual_test"></a>
 
-If you wish to run a full GUIDE-Seq dataset through the analysis pipeline, you may find it and a test manifest (to be altered depending on your dependency locations) here:
+如果你想通过分析流程运行一个完整的GUIDE-Seq数据集，你可以在下面找到，附带一个测试YAML清单（取决于你的依赖位置）：
 
 ```
 http://aryee.mgh.harvard.edu/guideseq/data/guideseq_test_fastq.zip
 ```
 
-which should be used with the following reference genome:
+上述文件应该与以下参考基因组一起使用：
 
 ```
 http://www.broadinstitute.org/ftp/pub/seq/references/Homo_sapiens_assembly19.fasta
 ```
 
-## Frequently Asked Questions<a name="FAQ"></a>
+## 常见问题<a name="FAQ"></a>
 
-### How do I Run the Pipeline with Demultiplexed Data?<a name="demultiplexed_run"></a>
+### 如何使用解复用数据来运行流程？<a name="demultiplexed_run"></a>
 
-If you already have demultiplexed data, you can run the pipeline on the data by running each step after demultiplexing individually, as described in the "Running Analysis Steps Individually" section above. Be sure to run the individual steps in the following orders:
+如果您已经有解复用数据，则可以在单独对数据解复用后再运行流程的每个步骤，如上面`运行独立的分析步骤`一节中所述。 请确认按以下顺序运行各个步骤：
 
 - `umitag`
 - `consolidate`
@@ -446,6 +444,6 @@ If you already have demultiplexed data, you can run the pipeline on the data by 
 - `filter`
 - `visualize`
 
-### Can I analyze data without UMIs?<a name="no_umis"></a>
+### 能否不通过UMIs来分析数据？<a name="no_umis"></a>
 
-Yes. If your reads do not have UMIs, you can run the pipeline on previously demultiplexed data as described in the "Running Analysis Steps Individually" section above, starting with the `align` step. **Note that we have not analyzed such data ourselves!** We suspect that PCR duplication bias may affect the quantitative interpretion of GUIDE-Seq read counts, but have not explored this.
+是。 如果您的读数不含UMI，那么可以按照上面的“单独运行分析步骤”一节中所述，从`对齐`步骤开始，对先前解复用的数据运行流程。  **请注意，我们还没有分析过这样的数据！** 我们怀疑PCR复制偏倚可能会影响GUIDE-Seq读数的定量解释，但尚未探索这一点。
